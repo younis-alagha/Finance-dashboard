@@ -149,15 +149,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   .kpi-grid{grid-template-columns:repeat(2,1fr)}
   .g2,.g3,.g13,.g31{grid-template-columns:1fr}
 }
-@media(max-width:640px){
+@media(max-width:900px){
   .sidebar{display:none}
-  body{display:block;padding-bottom:64px}
+  body{display:block;padding-bottom:72px}
   .main{height:auto}
   .page{padding:1rem}
   .bottom-nav{display:flex}
 }
-.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:100;padding:6px 0 max(6px,env(safe-area-inset-bottom))}
-.bottom-nav .nav-btn{flex:1;flex-direction:column;align-items:center;gap:2px;font-size:9px;padding:3px 0}
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:9999;padding:8px 0 max(12px,env(safe-area-inset-bottom))}
+.bottom-nav .nav-btn{flex:1;flex-direction:column;align-items:center;gap:2px;font-size:10px;padding:4px 0;border-radius:0}
 </style>
 </head>
 <body>
@@ -177,9 +177,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="page-header"><div class="page-title">Overview</div><div class="page-sub" id="ov-sub"></div></div>
   <div class="filter-section" id="ov-filters"></div>
   <div class="kpi-grid" id="ov-kpis"><div class="loading">Loading...</div></div>
+  <div id="ov-survival"></div>
   <div class="g2">
-    <div class="card"><div class="card-title">Spending by category</div><div class="pie-container"><div class="pie-canvas-wrap"><canvas id="ov-pie" width="150" height="150"></canvas><div class="pie-tooltip" id="ov-pie-tt"></div></div><div class="pie-legend" id="ov-legend"></div></div></div>
     <div class="card"><div class="card-title">Budget vs actual</div><div id="ov-bars"><div class="loading">Loading...</div></div></div>
+    <div class="card"><div class="card-title">Spending by category</div><div class="pie-container"><div class="pie-canvas-wrap"><canvas id="ov-pie" width="150" height="150"></canvas><div class="pie-tooltip" id="ov-pie-tt"></div></div><div class="pie-legend" id="ov-legend"></div></div></div>
   </div>
 </div>
 
@@ -189,7 +190,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="filter-section" id="y-filters"></div>
   <div class="kpi-grid" id="y-kpis"><div class="loading">Loading...</div></div>
   <div class="g2">
-    <div class="card"><div class="card-title">Spending by category</div><div class="pie-container"><div class="pie-canvas-wrap"><canvas id="y-pie" width="150" height="150"></canvas><div class="pie-tooltip" id="y-pie-tt"></div></div><div class="pie-legend" id="y-legend"></div></div></div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card"><div class="card-title">Spending by category</div><div class="pie-container"><div class="pie-canvas-wrap"><canvas id="y-pie" width="150" height="150"></canvas><div class="pie-tooltip" id="y-pie-tt"></div></div><div class="pie-legend" id="y-legend"></div></div></div>
+      <div class="card" id="y-savings-card"><div class="card-title">Savings summary</div><div id="y-savings-kpi"><div class="loading">Loading...</div></div></div>
+    </div>
     <div class="card"><div class="card-title">Budget vs actual</div><div id="y-bars"><div class="loading">Loading...</div></div></div>
   </div>
   <div class="card"><div class="card-title">Transactions</div><div class="tx-wrap" id="y-tx"><div class="loading">Loading...</div></div></div>
@@ -201,8 +205,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="filter-section" id="h-filters"></div>
   <div class="kpi-grid" id="h-kpis"><div class="loading">Loading...</div></div>
   <div class="g2">
-    <div class="card"><div class="card-title">Spending by category</div><div class="pie-container"><div class="pie-canvas-wrap"><canvas id="h-pie" width="150" height="150"></canvas><div class="pie-tooltip" id="h-pie-tt"></div></div><div class="pie-legend" id="h-legend"></div></div></div>
     <div class="card"><div class="card-title">Budget vs actual</div><div id="h-bars"><div class="loading">Loading...</div></div></div>
+    <div class="card"><div class="card-title">Spending by category</div><div class="pie-container"><div class="pie-canvas-wrap"><canvas id="h-pie" width="150" height="150"></canvas><div class="pie-tooltip" id="h-pie-tt"></div></div><div class="pie-legend" id="h-legend"></div></div></div>
   </div>
   <div class="card"><div class="card-title">Transactions</div><div class="tx-wrap" id="h-tx"><div class="loading">Loading...</div></div></div>
 </div>
@@ -220,6 +224,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="card"><span class="owner-badge yb">Younis</span><div class="card-title">Cards due</div><div id="c-younis"><div class="loading">Loading...</div></div></div>
     <div class="card"><span class="owner-badge hb">Home</span><div class="card-title">Cards due</div><div id="c-home"><div class="loading">Loading...</div></div></div>
     <div class="card"><div class="card-title">Reimbursements <span id="c-reimb-period" style="font-weight:400;color:var(--muted)"></span></div><div id="c-reimb"><div class="loading">Loading...</div></div></div>
+  </div>
+  <div class="drill-card" id="c-reimb-drill">
+    <button class="drill-back" onclick="closeReimbDrill()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Back to reimbursements</button>
+    <div class="card-title" id="c-reimb-drill-title">Transactions</div>
+    <div class="tx-wrap" id="c-reimb-drill-tx"></div>
   </div>
   <div class="combined-box"><div class="combined-lbl">Total card obligations</div><div class="combined-val" id="c-total">—</div></div>
 </div>
@@ -495,6 +504,19 @@ function renderOV(){
   const moNames=getAllMonths(CF,ow,year).filter(m=>months.includes(m.transaction_month)).map(m=>m.transaction_month_name);
   document.getElementById('ov-sub').textContent=`${moNames.join(', ')} ${year}${ow?' · '+ow:''}`;
   renderKPIs('ov-kpis',owner,year,months);
+  // Survival months from Younis saving balance
+  const savTx=TX.filter(d=>d.owner==='Younis'&&d.account==='SAVING');
+  const runBal=savTx.filter(d=>{const dt=new Date(d.transaction_date+'T12:00:00');return dt.getFullYear()<year||(dt.getFullYear()===year&&dt.getMonth()+1<=months[months.length-1]);}).reduce((s,t)=>s+Number(t.amount),0);
+  let survEl=document.getElementById('ov-survival');
+  if(survEl&&runBal>0){
+    const avgExp=CF.filter(d=>d.owner==='Younis').reduce((s,d,_,a)=>s+Number(d.total_expense||0)/a.length,0);
+    const survMo=avgExp>0?Math.round((runBal/avgExp)*10)/10:null;
+    survEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
+      <div class="kpi" style="--ka:var(--purple)"><div class="kpi-accent"></div><div class="kpi-label">Savings balance</div><div class="kpi-value" style="color:var(--purple)">${fmt(runBal)}</div><div class="kpi-prev">Younis · Wealthsimple</div></div>
+      <div class="kpi" style="--ka:var(--teal)"><div class="kpi-accent" style="--ka:var(--teal)"></div><div class="kpi-label">Survival months</div><div class="kpi-value" style="color:var(--teal)">${survMo||'—'}</div><div class="kpi-prev">At avg monthly expense</div></div>
+      <div class="kpi" style="--ka:var(--amber)"><div class="kpi-accent" style="--ka:var(--amber)"></div><div class="kpi-label">Avg monthly expense</div><div class="kpi-value" style="color:var(--amber)">${fmtK(avgExp)}</div><div class="kpi-prev">All months avg · Younis</div></div>
+    </div>`;
+  }else if(survEl){survEl.innerHTML='';}
   let cat=CT.filter(d=>d.transaction_year===year&&months.includes(d.transaction_month)&&d.transaction_type==='Expense');
   if(ow)cat=cat.filter(d=>d.owner===ow);
   // aggregate by category
@@ -525,6 +547,55 @@ function renderY(){
   const{year,months}=S.y;
   if(!year||!months.length)return;
   renderKPIs('y-kpis','Younis',year,months);
+
+  // Savings summary from SAVING account transactions
+  const savTx=TX.filter(d=>d.owner==='Younis'&&d.account==='SAVING').sort((a,b)=>a.transaction_date.localeCompare(b.transaction_date));
+  const savEl=document.getElementById('y-savings-kpi');
+  if(savTx.length){
+    // Get selected month saving transactions
+    const curSav=savTx.filter(d=>{const dt=new Date(d.transaction_date+'T12:00:00');return dt.getFullYear()===year&&months.includes(dt.getMonth()+1);});
+    // Get all saving by month for history
+    const savByMonth={};
+    savTx.forEach(t=>{
+      const dt=new Date(t.transaction_date+'T12:00:00');
+      const k=dt.getFullYear()+'-'+(dt.getMonth()+1);
+      if(!savByMonth[k])savByMonth[k]={total:0,month:dt.getMonth()+1,yr:dt.getFullYear()};
+      savByMonth[k].total+=+t.amount;
+    });
+    const sortedMonths=Object.values(savByMonth).sort((a,b)=>a.yr-b.yr||a.month-b.month);
+    const curKey=year+'-'+months[months.length-1];
+    const curIdx=sortedMonths.findIndex(m=>m.yr===year&&m.month===months[months.length-1]);
+    const curMonthSav=sortedMonths[curIdx]||{total:0};
+    const prevMonthSav=curIdx>0?sortedMonths[curIdx-1]:{total:0};
+    const curTotal=curSav.reduce((s,t)=>s+Number(t.amount),0);
+    const isPos=curTotal>=0;
+    // Income vs expense for savings KPI
+    const inc=cfSum('Younis',year,months,'total_income');
+    const exp=cfSum('Younis',year,months,'total_expense');
+    const netFlow=inc-exp;
+    // Running balance — last SAVING tx before or in selected period
+    const allPrior=savTx.filter(d=>{const dt=new Date(d.transaction_date+'T12:00:00');return dt.getFullYear()<year||(dt.getFullYear()===year&&dt.getMonth()+1<=months[months.length-1]);});
+    const runningBal=allPrior.reduce((s,t)=>s+Number(t.amount),0);
+    const prevBal=savTx.filter(d=>{const dt=new Date(d.transaction_date+'T12:00:00');return dt.getFullYear()<year||(dt.getFullYear()===year&&dt.getMonth()+1<months[0]);}).reduce((s,t)=>s+Number(t.amount),0);
+    const balDelta=runningBal-prevBal;
+    savEl.innerHTML=`
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div style="background:var(--card2);border-radius:10px;padding:12px;border:1px solid var(--border)">
+          <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">Current balance</div>
+          <div style="font-size:20px;font-weight:700;color:var(--purple)">${fmt(runningBal)}</div>
+          <div style="font-size:11px;margin-top:4px;color:${balDelta>=0?'var(--green)':'var(--red)'}">${balDelta>=0?'↑':'↓'} ${fmtK(Math.abs(balDelta))} this period</div>
+        </div>
+        <div style="background:var(--card2);border-radius:10px;padding:12px;border:1px solid var(--border)">
+          <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">Period flow</div>
+          <div style="font-size:20px;font-weight:700;color:${netFlow>=0?'var(--green)':'var(--red)'}">${netFlow>=0?'+':''}${fmtK(netFlow)}</div>
+          <div style="font-size:11px;margin-top:4px;color:var(--muted)">Income vs expense</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px">Saving transactions this period</div>
+      ${curSav.length?curSav.map(t=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--dim);font-size:12px"><span style="color:var(--muted)">${fmtShort(t.transaction_date)}</span><span style="color:${Number(t.amount)>=0?'var(--green)':'var(--red)'};font-weight:600}">${Number(t.amount)>=0?'+':''}${fmt(t.amount)}</span></div>`).join(''):'<div style="color:var(--muted);font-size:12px;padding:8px 0">No saving transactions this period</div>'}
+    `;
+  }else{savEl.innerHTML='<div class="empty">No saving data found</div>';}
+
   const cat=CT.filter(d=>d.owner==='Younis'&&d.transaction_year===year&&months.includes(d.transaction_month)&&d.transaction_type==='Expense');
   const catMap={};cat.forEach(d=>{catMap[d.category]=(catMap[d.category]||0)+(+d.total_absolute_amount);});
   const pieData=Object.entries(catMap).sort((a,b)=>b[1]-a[1]).slice(0,9).map(([l,v])=>({l,v}));
@@ -632,14 +703,31 @@ function renderC(){
   });
   const reimbArr=Object.values(reimbMap).filter(r=>r.amt<0);
   document.getElementById('c-reimb').innerHTML=reimbArr.length
-    ?reimbArr.map(r=>`<div class="reimb-chip">
-        <div><div class="reimb-name">${r.name}</div><div class="reimb-owner">${r.owner}</div></div>
+    ?reimbArr.map(r=>`<div class="reimb-chip" style="cursor:pointer" onclick="selectReimb('${r.owner}','${r.name}')">
+        <div><div class="reimb-name">${r.name} <span style="font-size:10px;color:var(--blue);font-weight:600">↗ view</span></div><div class="reimb-owner">${r.owner}</div></div>
         <div class="reimb-amt">${fmt(Math.abs(r.amt))}</div>
       </div>`).join('')
     :'<div class="cleared">All cleared ✓</div>';
 
   document.getElementById('c-total').textContent=fmt(yt+ht);
 }
+
+// ---- REIMBURSEMENT DRILL ----
+let selectedReimb=null;
+function selectReimb(owner,category){
+  selectedReimb={owner,category};
+  const{year,months}=S.c;
+  document.getElementById('c-reimb-drill').classList.add('open');
+  document.getElementById('c-reimb-drill-title').textContent=`${category} — Reimbursement transactions`;
+  const tx=TX.filter(d=>{
+    const dt=new Date(d.transaction_date+'T12:00:00');
+    return d.owner===owner&&d.category===category&&d.transaction_type==='Reimbursement'&&dt.getFullYear()===year&&months.includes(dt.getMonth()+1);
+  });
+  renderTx(tx,'c-reimb-drill-tx');
+  document.getElementById('c-reimb-drill').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function closeReimbDrill(){document.getElementById('c-reimb-drill').classList.remove('open');selectedReimb=null;}
+window.selectReimb=selectReimb;window.closeReimbDrill=closeReimbDrill;
 
 // ---- INIT ----
 async function init(){
